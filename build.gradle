@@ -1,0 +1,34 @@
+plugins {
+    id 'com.github.johnrengelman.shadow'
+    id 'org.unbroken-dome.test-sets'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.neovisionaries:nv-websocket-client:${nvWebsocketClientVersion}"
+    implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
+
+}
+
+ext {
+    mainClassName = 'Main'
+    shadowJarVersion = project.findProperty('buildShadowJarVersion') ?: project.version
+}
+
+shadowJar {
+    zip64 true
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': "${mainClassName}"
+    }
+    baseName = 'candles'
+    version = shadowJarVersion
+}
+
+build.dependsOn shadowJar
