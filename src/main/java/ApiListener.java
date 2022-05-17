@@ -16,8 +16,6 @@ import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.fasterxml.jackson.databind.DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS;
 import static com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS;
-import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
-import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_WITH_ZONE_ID;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS;
 
 public class ApiListener extends WebSocketAdapter {
@@ -50,7 +48,7 @@ public class ApiListener extends WebSocketAdapter {
     @Override
     public void onTextMessage(WebSocket websocket, String text) throws Exception {
         final var request = mapper.readValue(text, InputJson.class);
-        for (var event:request.data) {
+        for (var event : request.data) {
             var trade = new Trade(event.stock, event.time, event.price);
             marketManager.processMarketEvent(trade);
         }

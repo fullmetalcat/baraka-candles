@@ -1,14 +1,12 @@
 package model;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
 
 public class Candle {
+
     public final CandleSize candleUnit;
     public final LocalDateTime openTime;
     public final Optional<LocalDateTime> closeTime;
@@ -16,7 +14,6 @@ public class Candle {
     public final BigDecimal maxPrice;
     public final BigDecimal openPrice;
     public final BigDecimal closePrice;
-
 
     public Candle(CandleSize candleUnit,
                   LocalDateTime openTime, LocalDateTime closeTime,

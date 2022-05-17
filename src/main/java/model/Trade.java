@@ -6,7 +6,8 @@ import java.util.Comparator;
 
 import static java.util.Comparator.comparing;
 
-public class Trade implements Comparable<Trade>{
+public class Trade implements Comparable<Trade> {
+
     public String stockName;
     public LocalDateTime time;
     public BigDecimal price;
