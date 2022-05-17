@@ -42,6 +42,9 @@ public class ApiListener extends WebSocketAdapter {
         final var request = mapper.readValue(text, InputJson.class);
         for (var event : request.data) {
             var trade = new Trade(event.stock, event.time, event.price);
+            if (trade.stockName.equals("DFE")) {
+                LOG.info("DFE trade {}",trade);
+            }
             marketManager.processMarketEvent(trade);
         }
     }

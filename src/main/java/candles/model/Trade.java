@@ -24,4 +24,13 @@ public class Trade implements Comparable<Trade> {
     public int compareTo(Trade that) {
         return COMPARATOR.compare(this, that);
     }
+
+    @Override
+    public String toString() {
+        return "Trade{" +
+            "stockName='" + stockName + '\'' +
+            ", time=" + time +
+            ", price=" + price +
+            '}';
+    }
 }

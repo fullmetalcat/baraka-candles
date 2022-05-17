@@ -42,7 +42,10 @@ public class Main {
             final var socket = factory.createSocket(uri);
             LOG.info("open: {}", socket.isOpen());
 
-            final var market = new MarketManager(List.of(new CandleSize(5, SECONDS)));
+            final var market = new MarketManager(List.of(
+                new CandleSize(5, SECONDS),
+                new CandleSize(30, SECONDS)
+                ));
             final var listener = new ApiListener(market, mapper);
 
             Spark.port(8080);

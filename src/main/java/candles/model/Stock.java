@@ -58,7 +58,7 @@ public class Stock {
     public List<Candle> getCandles(CandleSize candleSize) {
         final var lock = consistencyLocks.get(candleSize);
         lock.lock();
-        LOG.info("returning candles");
+        //LOG.info("returning candles");
 
         try {
             calculateFinalCandles(candleSize);// this guarantees curTrades contains only non-final candle data
@@ -107,7 +107,7 @@ public class Stock {
             if (trade.price.compareTo(minPrice) < 0) {
                 minPrice = trade.price;
             }
-            firstTrade = trade;
+            lastTrade = trade;
         }
 
         var candle = new Candle(candleSize, firstTrade.time, minPrice, maxPrice, firstTrade.price, lastTrade.price);
@@ -117,7 +117,7 @@ public class Stock {
 
     // task that calculates all complete candles from the queue
     public void calculateFinalCandles(CandleSize candleSize) {
-        LOG.info("attempting to calculate candles for {}", stockName);
+        //LOG.info("attempting to calculate candles for {}", stockName);
         final var lock = consistencyLocks.get(candleSize);
         lock.lock();
 
@@ -158,11 +158,11 @@ public class Stock {
                         if (candleTrades.size() != 0) {
 
                             var candle = new Candle(candleSize,
-                                candleTrades.get(candleTrades.size() - 1).time, candleTrades.get(0).time,
+                                candleTrades.get(0).time, candleTrades.get(candleTrades.size() - 1).time,
                                 minPrice, maxPrice,
-                                candleTrades.get(candleTrades.size() - 1).price, candleTrades.get(0).price
+                                candleTrades.get(0).price, candleTrades.get(candleTrades.size() - 1).price
                             );
-                            LOG.info("candle calculated:" + candle);
+                            //LOG.info("candle calculated:" + candle);
                             candles.get(candleSize).add(candle);
                         }
                         maxPrice = trade.price;
@@ -178,7 +178,7 @@ public class Stock {
             curTrades.put(candleSize, new ConcurrentLinkedDeque<>(candleTrades));//re-ading trades if no closed candle was calculated
         } finally {
             lock.unlock();
-            LOG.info("finished attempt to calculate candles for {}", stockName);
+            //LOG.info("finished attempt to calculate candles for {}", stockName);
         }
 
     }
