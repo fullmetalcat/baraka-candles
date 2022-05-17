@@ -9,11 +9,18 @@ repositories {
 
 dependencies {
     implementation "com.neovisionaries:nv-websocket-client:${nvWebsocketClientVersion}"
+
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
-
+    implementation("com.sparkjava:spark-core:${sparkJavaVersion}") {
+        exclude group: "org.eclipse.jetty"
+        exclude group: "org.eclipse.jetty.websocket"
+    }
+    implementation "javax.servlet:javax.servlet-api:${javaxServletApiVersion}"
+    implementation "org.eclipse.jetty:jetty-server:${jettyVersion}"
+    implementation "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
 
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
@@ -27,7 +34,7 @@ test {
 }
 
 ext {
-    mainClassName = 'Main'
+    mainClassName = 'candles.Main'
     shadowJarVersion = project.findProperty('buildShadowJarVersion') ?: project.version
 }
 

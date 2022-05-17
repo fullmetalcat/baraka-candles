@@ -1,4 +1,4 @@
-package model;
+package candles.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

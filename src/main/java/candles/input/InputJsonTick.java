@@ -1,4 +1,4 @@
-package input;
+package candles.input;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import static java.time.ZoneOffset.UTC;
+import static candles.Main.DEFAULT_TIME_ZONE_OFFSET;
 
 public class InputJsonTick {
 
@@ -19,7 +19,7 @@ public class InputJsonTick {
                          @JsonProperty("t") long timestamp) {
         this.price = price;
         this.stock = stock;
-        this.time = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), UTC);
+        this.time = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), DEFAULT_TIME_ZONE_OFFSET);
     }
 
     @Override

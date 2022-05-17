@@ -1,4 +1,4 @@
-package model;
+package candles.model;
 
 import org.junit.jupiter.api.Test;
 

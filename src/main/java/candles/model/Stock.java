@@ -1,4 +1,4 @@
-package model;
+package candles.model;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.time.ZoneOffset.UTC;
+import static candles.Main.DEFAULT_TIME_ZONE_OFFSET;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -185,12 +185,8 @@ public class Stock {
 
     public LocalDateTime calculateAbsoluteStartDate(LocalDateTime curTime, CandleSize candle) {
         // TODO inject timezone
-        // 5 minutes
-        //19.42 -> 19.00 in millis
-        final var rougthTrunc = curTime.truncatedTo(candle.getBiggerTimeUnit(candle.unit)).toInstant(UTC).toEpochMilli();
-        //19.42 -> 19.42 in millis
-        final var minorTrunc = curTime.truncatedTo(candle.unit).toInstant(UTC).toEpochMilli();
-        //42 minutes in milis
+        final var rougthTrunc = curTime.truncatedTo(candle.getBiggerTimeUnit(candle.unit)).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
+        final var minorTrunc = curTime.truncatedTo(candle.unit).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
         final var delta = minorTrunc - rougthTrunc;
 
         // 5 mins is millis
@@ -199,7 +195,7 @@ public class Stock {
         // 8
         final var intervalsAmount = delta / intervalSize;
 
-        return Instant.ofEpochMilli(rougthTrunc + intervalSize * intervalsAmount).atZone(UTC).toLocalDateTime();
+        return Instant.ofEpochMilli(rougthTrunc + intervalSize * intervalsAmount).atZone(DEFAULT_TIME_ZONE_OFFSET).toLocalDateTime();
     }
 
     public LocalDateTime calculateAbsoluteEndDate(LocalDateTime beginigTime, CandleSize candle) {

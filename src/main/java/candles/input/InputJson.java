@@ -1,4 +1,4 @@
-package input;
+package candles.input;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

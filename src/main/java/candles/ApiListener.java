@@ -1,37 +1,29 @@
+package candles;
+
+import candles.input.InputJson;
+import candles.model.MarketManager;
+import candles.model.Trade;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketState;
-import input.InputJson;
-import model.MarketManager;
-import model.Trade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN;
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static com.fasterxml.jackson.databind.DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS;
-import static com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS;
-import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS;
-
 public class ApiListener extends WebSocketAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiListener.class);
-    private static final ObjectMapper mapper = new ObjectMapper()
-        .configure(WRITE_BIGDECIMAL_AS_PLAIN, true)
-        .configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .configure(USE_BIG_DECIMAL_FOR_FLOATS, true)
-        .configure(WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
-        .configure(READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
+    private final ObjectMapper mapper;
 
     private final MarketManager marketManager;
 
-    public ApiListener(MarketManager marketManager) {
+    public ApiListener(MarketManager marketManager, ObjectMapper mapper) {
         this.marketManager = marketManager;
+        this.mapper = mapper;
     }
 
     @Override
