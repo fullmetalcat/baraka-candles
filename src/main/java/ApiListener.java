@@ -4,6 +4,8 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketState;
 import input.InputJson;
+import model.MarketManager;
+import model.Trade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,12 @@ public class ApiListener extends WebSocketAdapter {
         .configure(WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
         .configure(READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
 
+    private final MarketManager marketManager;
+
+    public ApiListener(MarketManager marketManager) {
+        this.marketManager = marketManager;
+    }
+
     @Override
     public void onStateChanged(WebSocket websocket, WebSocketState newState) throws Exception {
         super.onStateChanged(websocket, newState);
@@ -42,7 +50,10 @@ public class ApiListener extends WebSocketAdapter {
     @Override
     public void onTextMessage(WebSocket websocket, String text) throws Exception {
         final var request = mapper.readValue(text, InputJson.class);
-        LOG.info("tick: {}", request);
+        for (var event:request.data) {
+            var trade = new Trade(event.stock, event.time, event.price);
+            marketManager.processMarketEvent(trade);
+        }
     }
 
     @Override

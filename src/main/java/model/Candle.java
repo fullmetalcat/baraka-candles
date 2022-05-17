@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class Candle {
-    public final ChronoUnit candleUnit;
+    public final CandleSize candleUnit;
     public final LocalDateTime openTime;
     public final Optional<LocalDateTime> closeTime;
     public final BigDecimal minPrice;
@@ -18,7 +18,7 @@ public class Candle {
     public final BigDecimal closePrice;
 
 
-    public Candle(ChronoUnit candleUnit,
+    public Candle(CandleSize candleUnit,
                   LocalDateTime openTime, LocalDateTime closeTime,
                   BigDecimal minPrice, BigDecimal maxPrice,
                   BigDecimal openPrice, BigDecimal closePrice) {
@@ -31,7 +31,7 @@ public class Candle {
         this.closePrice = closePrice;
     }
 
-    public Candle(ChronoUnit candleUnit,
+    public Candle(CandleSize candleUnit,
                   LocalDateTime openTime,
                   BigDecimal minPrice, BigDecimal maxPrice,
                   BigDecimal openPrice, BigDecimal closePrice) {
