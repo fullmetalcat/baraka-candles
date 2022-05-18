@@ -1,5 +1,6 @@
 package candles.model;
 
+import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +48,9 @@ public class Stock {
                 calculateFinalCandles(cu);
             }, 1000, durationInMillis, MILLISECONDS);
         });
-
     }
 
-    // this introduces weak consisteny into the API - last candle might be inconsistent
+    // no locks - tradeoff
     public void addTrade(Trade trade) {
         curTrades.values().forEach(q -> q.add(trade));
     }
@@ -58,7 +58,6 @@ public class Stock {
     public List<Candle> getCandles(CandleSize candleSize) {
         final var lock = consistencyLocks.get(candleSize);
         lock.lock();
-        //LOG.info("returning candles");
 
         try {
             calculateFinalCandles(candleSize);// this guarantees curTrades contains only non-final candle data
@@ -81,7 +80,7 @@ public class Stock {
     }
 
     public Optional<Candle> calculateNonFinalCandle(CandleSize candleSize) {
-        System.out.println("calculating last candle");
+
         final var tradesIterator = curTrades.get(candleSize).iterator();
 
         var maxPrice = new BigDecimal(0);
@@ -110,20 +109,17 @@ public class Stock {
             lastTrade = trade;
         }
 
-        var candle = new Candle(candleSize, firstTrade.time, minPrice, maxPrice, firstTrade.price, lastTrade.price);
-        System.out.println("last candle calculated:" + candle);
+        final var candle = new Candle(candleSize, firstTrade.time, minPrice, maxPrice, firstTrade.price, lastTrade.price);
         return Optional.of(candle);
     }
 
-    // task that calculates all complete candles from the queue
     public void calculateFinalCandles(CandleSize candleSize) {
-        //LOG.info("attempting to calculate candles for {}", stockName);
         final var lock = consistencyLocks.get(candleSize);
         lock.lock();
 
         try {
             final var tradesIterator = curTrades.get(candleSize).iterator();//starting from the oldest trade
-            final List<Trade> candleTrades = new ArrayList<>(); // will search all trades within candle time interval to add to the list
+            final var candleTrades = new ArrayList<Trade>(); // will search all trades within candle time interval to add to the list
             LocalDateTime candleSliceTimeLeft;
             LocalDateTime candleSliceTimeRight;
             BigDecimal maxPrice;
@@ -157,12 +153,11 @@ public class Stock {
                         // adding candle to the list of final candles
                         if (candleTrades.size() != 0) {
 
-                            var candle = new Candle(candleSize,
+                            final var candle = new Candle(candleSize,
                                 candleTrades.get(0).time, candleTrades.get(candleTrades.size() - 1).time,
                                 minPrice, maxPrice,
                                 candleTrades.get(0).price, candleTrades.get(candleTrades.size() - 1).price
                             );
-                            //LOG.info("candle calculated:" + candle);
                             candles.get(candleSize).add(candle);
                         }
                         maxPrice = trade.price;
@@ -175,26 +170,21 @@ public class Stock {
                     }
                 }
             }
-            curTrades.put(candleSize, new ConcurrentLinkedDeque<>(candleTrades));//re-ading trades if no closed candle was calculated
-        } catch (Exception e) {
-            LOG.error("exception", e);
+            curTrades.put(candleSize, new ConcurrentLinkedDeque<>(candleTrades));//re-adding trades if no closed candle was calculated
         } finally {
             lock.unlock();
-            //LOG.info("finished attempt to calculate candles for {}", stockName);
         }
 
     }
 
+    // this method truncated time passed to the candle interval begining. for example if time is 12:12, candle is 5 minutes, result will be 12:10
     public LocalDateTime calculateAbsoluteStartDate(LocalDateTime curTime, CandleSize candle) {
-        // TODO inject timezone
         final var rougthTrunc = curTime.truncatedTo(candle.getBiggerTimeUnit(candle.unit)).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
         final var minorTrunc = curTime.truncatedTo(candle.unit).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
         final var delta = minorTrunc - rougthTrunc;
 
-        // 5 mins is millis
         final var intervalSize = candle.unit.getDuration().toMillis() * candle.size;
 
-        // 8
         final var intervalsAmount = delta / intervalSize;
 
         return Instant.ofEpochMilli(rougthTrunc + intervalSize * intervalsAmount).atZone(DEFAULT_TIME_ZONE_OFFSET).toLocalDateTime();

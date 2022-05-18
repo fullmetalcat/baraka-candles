@@ -61,7 +61,8 @@ public class Application {
             final var socket = factory.createSocket(uri);
             LOG.info("open: {}", socket.isOpen());
 
-            final var market = new MarketManager(List.of(new CandleSize(1, SECONDS), new CandleSize(5, SECONDS), new CandleSize(10, SECONDS), new CandleSize(15, SECONDS), new CandleSize(30, SECONDS), new CandleSize(1, MINUTES), new CandleSize(5, MINUTES), new CandleSize(10, MINUTES), new CandleSize(15, MINUTES), new CandleSize(30, MINUTES), new CandleSize(1, HOURS)));
+            final var market = new MarketManager(config.candleSizes, config.threadPoolSize);
+
             final var listener = new ApiListener(market, OBJECT_MAPPER);
 
             Spark.port(config.port);

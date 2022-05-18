@@ -16,12 +16,13 @@ public class MarketManager {
 
     private final List<CandleSize> candleUnits;
 
-    private final ScheduledExecutorService scheduler = newScheduledThreadPool(100);
+    private final ScheduledExecutorService scheduler ;
 
     // TODO from config
-    public MarketManager(List<CandleSize> candleUnits) {
+    public MarketManager(List<CandleSize> candleUnits, int threadpoolSize) {
         this.market = new ConcurrentHashMap<>();
         this.candleUnits = candleUnits;
+        this.scheduler = newScheduledThreadPool(threadpoolSize);
     }
 
     public void processMarketEvent(Trade event) {
