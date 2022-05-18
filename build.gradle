@@ -34,7 +34,7 @@ test {
 }
 
 ext {
-    mainClassName = 'candles.Main'
+    mainClassName = 'candles.Application'
     shadowJarVersion = project.findProperty('buildShadowJarVersion') ?: project.version
 }
 

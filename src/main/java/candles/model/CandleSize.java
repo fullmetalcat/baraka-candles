@@ -12,7 +12,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class CandleSize {
 
     //available units TODO move to config
-    public final List<ChronoUnit> unitRelations = List.of(SECONDS, MINUTES, HOURS, DAYS);
+    public final static List<ChronoUnit> unitRelations = List.of(SECONDS, MINUTES, HOURS, DAYS);
 
     public final int size;
     public final ChronoUnit unit;
@@ -28,8 +28,8 @@ public class CandleSize {
         return unit.getDuration().toMillis() * size;
     }
 
-    public ChronoUnit getBiggerTimeUnit(ChronoUnit unit) {
-        for (var i = 0; i < unitRelations.size() - 2; ++i) {
+    public final static ChronoUnit getBiggerTimeUnit(ChronoUnit unit) {
+        for (var i = 0; i < unitRelations.size() - 1; ++i) {
             if (unit == unitRelations.get(i)) {
                 return unitRelations.get(i + 1);
             }

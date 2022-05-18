@@ -12,7 +12,7 @@ public class InputJson {
     public InputJson(@JsonProperty("data") List<InputJsonTick> data,
                      @JsonProperty("type") String type) {
         this.data = data;
-        this.type = type;
+        this.type = type.intern();
     }
 
     @Override

@@ -18,7 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static candles.Main.DEFAULT_TIME_ZONE_OFFSET;
+import static candles.Application.DEFAULT_TIME_ZONE_OFFSET;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -45,7 +45,7 @@ public class Stock {
             consistencyLocks.put(cu, new ReentrantLock());
             scheduler.scheduleAtFixedRate(() -> {
                 calculateFinalCandles(cu);
-            }, 1000, durationInMillis * 2, MILLISECONDS);
+            }, 1000, durationInMillis, MILLISECONDS);
         });
 
     }
@@ -176,6 +176,8 @@ public class Stock {
                 }
             }
             curTrades.put(candleSize, new ConcurrentLinkedDeque<>(candleTrades));//re-ading trades if no closed candle was calculated
+        } catch (Exception e) {
+            LOG.error("exception", e);
         } finally {
             lock.unlock();
             //LOG.info("finished attempt to calculate candles for {}", stockName);

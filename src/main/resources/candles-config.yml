@@ -1,0 +1,2 @@
+port: 8080
+url: ws://b-mocks.dev.app.getbaraka.com:9989

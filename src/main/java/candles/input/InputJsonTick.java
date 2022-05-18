@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import static candles.Main.DEFAULT_TIME_ZONE_OFFSET;
+import static candles.Application.DEFAULT_TIME_ZONE_OFFSET;
 
 public class InputJsonTick {
 
@@ -18,7 +18,7 @@ public class InputJsonTick {
                          @JsonProperty("s") String stock,
                          @JsonProperty("t") long timestamp) {
         this.price = price;
-        this.stock = stock;
+        this.stock = stock.intern();
         this.time = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), DEFAULT_TIME_ZONE_OFFSET);
     }
 
