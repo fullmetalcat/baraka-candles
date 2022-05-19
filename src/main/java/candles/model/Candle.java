@@ -3,13 +3,12 @@ package candles.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Candle {
 
     public final CandleSize candleUnit;
     public final LocalDateTime openTime;
-    public final Optional<LocalDateTime> closeTime;
+    public final LocalDateTime closeTime;
     public final BigDecimal minPrice;
     public final BigDecimal maxPrice;
     public final BigDecimal openPrice;
@@ -21,26 +20,12 @@ public class Candle {
                   BigDecimal openPrice, BigDecimal closePrice) {
         this.candleUnit = candleUnit;
         this.openTime = openTime;
-        this.closeTime = Optional.of(closeTime);
+        this.closeTime = closeTime;
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
         this.openPrice = openPrice;
         this.closePrice = closePrice;
     }
-
-    public Candle(CandleSize candleUnit,
-                  LocalDateTime openTime,
-                  BigDecimal minPrice, BigDecimal maxPrice,
-                  BigDecimal openPrice, BigDecimal closePrice) {
-        this.candleUnit = candleUnit;
-        this.openTime = openTime;
-        this.closeTime = Optional.empty();
-        this.minPrice = minPrice;
-        this.maxPrice = maxPrice;
-        this.openPrice = openPrice;
-        this.closePrice = closePrice;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

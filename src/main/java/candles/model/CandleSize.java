@@ -35,9 +35,9 @@ public class CandleSize {
     }
 
     // this method truncates time to the candle interval beginning. for example if time is 12:12, candle is 5 minutes, result will be 12:10
-    public LocalDateTime calculateAbsoluteStartDate(LocalDateTime curTime) {
-        final var largerChronoUnitTruncation = curTime.truncatedTo(getBiggerTimeUnit(this.unit)).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
-        final var minorChronoUnitTruncation = curTime.truncatedTo(this.unit).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
+    public LocalDateTime calculateAbsoluteStartDate(LocalDateTime tradeTime) {
+        final var largerChronoUnitTruncation = tradeTime.truncatedTo(getBiggerTimeUnit(this.unit)).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
+        final var minorChronoUnitTruncation = tradeTime.truncatedTo(this.unit).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
         final var delta = minorChronoUnitTruncation - largerChronoUnitTruncation;
 
         final var intervalSize = this.unit.getDuration().toMillis() * this.size;
@@ -47,8 +47,8 @@ public class CandleSize {
         return Instant.ofEpochMilli(largerChronoUnitTruncation + intervalSize * intervalsAmount).atZone(DEFAULT_TIME_ZONE_OFFSET).toLocalDateTime();
     }
 
-    public LocalDateTime calculateAbsoluteEndDate(LocalDateTime beginnigTime) {
-        return beginnigTime.plus(unit.getDuration().multipliedBy(size));
+    public LocalDateTime calculateAbsoluteEndDate(LocalDateTime sliceLeftTime) {
+        return sliceLeftTime.plus(unit.getDuration().multipliedBy(size));
     }
 
     public static ChronoUnit getBiggerTimeUnit(ChronoUnit unit) {
@@ -76,7 +76,7 @@ public class CandleSize {
     @Override
     public String toString() {
         return "CandleSize{" +
-            ", size=" + size +
+            "size=" + size +
             ", unit=" + unit +
             '}';
     }
