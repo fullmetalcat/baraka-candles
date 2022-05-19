@@ -69,9 +69,9 @@ public class Application {
     }
 
     private static WebSocket initializeWebSocet(Config config, ApiListener apiListener) throws IOException {
-        var factory = new WebSocketFactory();
+        final var factory = new WebSocketFactory();
         factory.setConnectionTimeout(1000);
-        var uri = URI.create(config.url);
+        final var uri = URI.create(config.url);
         final var socket = factory.createSocket(uri);
         LOG.info("open: {}", socket.isOpen());
         socket.addListener(apiListener);

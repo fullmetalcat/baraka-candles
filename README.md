@@ -19,7 +19,7 @@ REST API has one method - GET /<stock_name>/candles?cu=<chrono_unit_name>&l=<siz
 
 stock_name - name of the symbol. can be any stock name that was processed by the app.
 
-chrono_unit_name - name of candle chronoUnit(java class) - is configured in CandleSize. 
+chrono_unit_name - name of candle ChronoUnit(java class) - available units are configured in CandleSize. 
 
 size - number of chrono unints in the candle
 

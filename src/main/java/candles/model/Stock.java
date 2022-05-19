@@ -18,6 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.Math.max;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -26,8 +27,10 @@ public class Stock {
     private static final Logger LOG = LoggerFactory.getLogger(Stock.class);
 
     public final String stockName;
-    private final Map<CandleSize, List<Candle>> candles; // long-term candle storage
-    private final Map<CandleSize, Deque<Trade>> curTrades; // storage of current trades, queue is periodically emptied to calculate another candle
+    // long-term candle storage
+    private final Map<CandleSize, List<Candle>> candles;
+    // storage of current trades, queue is periodically emptied to calculate finalized candles
+    private final Map<CandleSize, Deque<Trade>> curTrades;
     private final Map<CandleSize, Lock> consistencyLocks;
 
     public Stock(String stockName, List<CandleSize> candleUnits, ScheduledExecutorService scheduler) {
@@ -39,7 +42,7 @@ public class Stock {
 
         candleUnits.forEach(cu -> {
             candles.put(cu, new LinkedList<>());
-            final var durationInMillis = cu.getDurationInMillis();
+            final var durationInMillis = max(cu.getDurationInMillis(), 60_000);//euristic for big candles
             curTrades.put(cu, new ConcurrentLinkedDeque<>());
             consistencyLocks.put(cu, new ReentrantLock());
             scheduler.scheduleAtFixedRate(() -> {
@@ -48,7 +51,6 @@ public class Stock {
         });
     }
 
-    // no locks - tradeoff
     public void addTrade(Trade trade) {
         curTrades.values().forEach(q -> q.add(trade));
     }
@@ -61,12 +63,12 @@ public class Stock {
         try {
             calculateFinalCandles(candleSize);// this guarantees curTrades contains only non-final candle data
 
-            final var last = calculateNonFinalCandle(candleSize);
+            final var lastCandle = calculateNonFinalCandle(candleSize);
             final var finalCandles = candles.get(candleSize);
 
-            if (last.isPresent()) {
+            if (lastCandle.isPresent()) {
                 final var res = new LinkedList<>(finalCandles);
-                res.add(last.get());
+                res.add(lastCandle.get());
                 return unmodifiableList(res);
             } else {
                 return unmodifiableList(finalCandles);
@@ -171,7 +173,6 @@ public class Stock {
         } finally {
             lock.unlock();
         }
-
     }
 
 }
