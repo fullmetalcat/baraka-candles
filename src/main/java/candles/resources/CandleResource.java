@@ -36,7 +36,7 @@ public class CandleResource implements Resource {
             final var candles =  marketManager.getCandles(stockName, candleSize);
 
             if (candles.isPresent()) {
-                final var jsonCandles = new JsonCandles(candles.get(), candleSize);
+                final var jsonCandles = new JsonCandles(candles.get(), candleSize, stockName);
                 return OBJECT_MAPPER.writeValueAsString(jsonCandles);
             } else {
                 response.status(404);
