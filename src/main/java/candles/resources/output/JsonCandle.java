@@ -19,16 +19,9 @@ public class JsonCandle {
     @JsonSerialize(using = CustomOptionalDateTimeSerializer.class)
     public final Optional<LocalDateTime> closeTime;
 
-    @JsonRawValue
     public final BigDecimal minPrice;
-
-    @JsonRawValue
     public final BigDecimal maxPrice;
-
-    @JsonRawValue
     public final BigDecimal openPrice;
-
-    @JsonRawValue
     public final BigDecimal closePrice;
 
     public JsonCandle(Candle candle) {

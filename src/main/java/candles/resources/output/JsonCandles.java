@@ -11,16 +11,13 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 public class JsonCandles {
-
     public final List<JsonCandle> candles;
-    @JsonRawValue
     public final Integer candleSize;
-    @JsonRawValue
-    public final ChronoUnit candleChronoUnit;
+    public final String candleChronoUnit;
 
     public JsonCandles(List<Candle> candles, CandleSize candleSize) {
         this.candles = candles.stream().map(c -> new JsonCandle(c)).collect(toList());
-        this.candleChronoUnit = candleSize.unit;
+        this.candleChronoUnit = candleSize.unit.name();
         this.candleSize = candleSize.size;
 
     }
