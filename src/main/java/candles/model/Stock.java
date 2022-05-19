@@ -1,6 +1,5 @@
 package candles.model;
 
-import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static candles.Application.DEFAULT_TIME_ZONE_OFFSET;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -128,8 +126,8 @@ public class Stock {
             if (tradesIterator.hasNext()) { // scanning first trade as a candle start
                 var trade = tradesIterator.next();
 
-                candleSliceTimeLeft = calculateAbsoluteStartDate(trade.time, candleSize);
-                candleSliceTimeRight = calculateAbsoluteEndDate(candleSliceTimeLeft, candleSize);
+                candleSliceTimeLeft = candleSize.calculateAbsoluteStartDate(trade.time);
+                candleSliceTimeRight = candleSize.calculateAbsoluteEndDate(candleSliceTimeLeft);
 
                 maxPrice = trade.price;
                 minPrice = trade.price;
@@ -175,23 +173,6 @@ public class Stock {
             lock.unlock();
         }
 
-    }
-
-    // this method truncated time passed to the candle interval begining. for example if time is 12:12, candle is 5 minutes, result will be 12:10
-    public LocalDateTime calculateAbsoluteStartDate(LocalDateTime curTime, CandleSize candle) {
-        final var rougthTrunc = curTime.truncatedTo(candle.getBiggerTimeUnit(candle.unit)).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
-        final var minorTrunc = curTime.truncatedTo(candle.unit).toInstant(DEFAULT_TIME_ZONE_OFFSET).toEpochMilli();
-        final var delta = minorTrunc - rougthTrunc;
-
-        final var intervalSize = candle.unit.getDuration().toMillis() * candle.size;
-
-        final var intervalsAmount = delta / intervalSize;
-
-        return Instant.ofEpochMilli(rougthTrunc + intervalSize * intervalsAmount).atZone(DEFAULT_TIME_ZONE_OFFSET).toLocalDateTime();
-    }
-
-    public LocalDateTime calculateAbsoluteEndDate(LocalDateTime beginigTime, CandleSize candle) {
-        return beginigTime.plus(candle.unit.getDuration().multipliedBy(candle.size));
     }
 
 }

@@ -1,13 +1,14 @@
 package candles;
 
 import candles.config.Config;
-import candles.config.ConfigParser;
-import candles.model.CandleSize;
+import candles.integration.ApiListener;
 import candles.model.MarketManager;
 import candles.resources.CandleResource;
-import com.fasterxml.jackson.core.JsonParser;
+import candles.resources.serializers.CustomDateTimeSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import org.slf4j.Logger;
@@ -15,30 +16,35 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.util.List;
 
-import static candles.config.ConfigParser.loadLocalConfigFrom;
+import static candles.config.ConfigLoader.loadLocalConfigFrom;
 import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.fasterxml.jackson.databind.DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS;
 import static com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS;
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS;
-import static java.lang.String.format;
-import static java.nio.ByteBuffer.wrap;
-import static java.nio.file.Files.readString;
 import static java.time.ZoneOffset.UTC;
-import static java.time.temporal.ChronoUnit.HOURS;
-import static java.time.temporal.ChronoUnit.MINUTES;
-import static java.time.temporal.ChronoUnit.SECONDS;
 
 public class Application {
 
     public final static ZoneOffset DEFAULT_TIME_ZONE_OFFSET = UTC;
 
-    public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper().configure(WRITE_BIGDECIMAL_AS_PLAIN, true).configure(FAIL_ON_UNKNOWN_PROPERTIES, false).configure(USE_BIG_DECIMAL_FOR_FLOATS, true).configure(WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false).configure(READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
+    public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+        .registerModule(new SimpleModule("customSerializers")
+            .addSerializer(LocalDateTime.class, new CustomDateTimeSerializer(LocalDateTime.class)))
+        .configure(WRITE_BIGDECIMAL_AS_PLAIN, true)
+        .configure(WRITE_DATES_AS_TIMESTAMPS, true)
+        .configure(WRITE_DATES_AS_TIMESTAMPS, true)
+        .configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .configure(USE_BIG_DECIMAL_FOR_FLOATS, true)
+        .configure(WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+        .configure(READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
@@ -47,35 +53,45 @@ public class Application {
 
         try {
             final var config = loadLocalConfigFrom(configPath);
-
             start(config);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void start(Config config) {
+    public static void start(Config config, ApiListener apiListener, MarketManager market) {
         try {
-            var factory = new WebSocketFactory();
-            var uri = URI.create(config.url);
-            final var socket = factory.createSocket(uri);
-            LOG.info("open: {}", socket.isOpen());
+            initializeHttpResources(config, market);
 
-            final var market = new MarketManager(config.candleSizes, config.threadPoolSize);
-
-            final var listener = new ApiListener(market, OBJECT_MAPPER);
-
-            Spark.port(config.port);
-            final var candleResource = new CandleResource(market);
-            candleResource.registerRoutes();
-            registerShutdownHook();
-            Spark.awaitInitialization();
-
-            socket.addListener(listener);
-            socket.connect();
+            final var socket = initializeWebSocet(config, apiListener);
+            socket.connect();//blocks thread
         } catch (IOException | WebSocketException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void start(Config config) {
+        final var market = new MarketManager(config.candleSizes, config.threadPoolSize);
+        final var listener = new ApiListener(market);
+        start(config, listener, market);
+    }
+
+    private static WebSocket initializeWebSocet(Config config, ApiListener apiListener) throws IOException {
+        var factory = new WebSocketFactory();
+        factory.setConnectionTimeout(1000);
+        var uri = URI.create(config.url);
+        final var socket = factory.createSocket(uri);
+        LOG.info("open: {}", socket.isOpen());
+        socket.addListener(apiListener);
+        return socket;
+    }
+
+    private static void initializeHttpResources(Config config, MarketManager market) {
+        Spark.port(config.port);
+        final var candleResource = new CandleResource(market);
+        candleResource.registerRoutes();
+        registerShutdownHook();
+        Spark.awaitInitialization();
     }
 
     private static void registerShutdownHook() {

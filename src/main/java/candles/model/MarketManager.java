@@ -16,7 +16,7 @@ public class MarketManager {
 
     private final List<CandleSize> candleUnits;
 
-    private final ScheduledExecutorService scheduler ;
+    private final ScheduledExecutorService scheduler;
 
     // TODO from config
     public MarketManager(List<CandleSize> candleUnits, int threadpoolSize) {

@@ -1,12 +1,12 @@
-package candles;
+package candles.integration;
 
 import candles.input.InputJson;
 import candles.model.MarketManager;
 import candles.model.Trade;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
+import com.neovisionaries.ws.client.WebSocketFrame;
 import com.neovisionaries.ws.client.WebSocketState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,21 +14,21 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+import static candles.Application.OBJECT_MAPPER;
+
 public class ApiListener extends WebSocketAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiListener.class);
-    private final ObjectMapper mapper;
 
     private final MarketManager marketManager;
 
-    public ApiListener(MarketManager marketManager, ObjectMapper mapper) {
+    public ApiListener(MarketManager marketManager) {
         this.marketManager = marketManager;
-        this.mapper = mapper;
     }
 
     @Override
-    public void onStateChanged(WebSocket websocket, WebSocketState newState) throws Exception {
-        super.onStateChanged(websocket, newState);
+    public void onStateChanged(WebSocket websocket, WebSocketState newState) {
+        LOG.info("state changed to {}", newState);
     }
 
     @Override
@@ -39,23 +39,30 @@ public class ApiListener extends WebSocketAdapter {
 
     @Override
     public void onTextMessage(WebSocket websocket, String text) throws Exception {
-        final var request = mapper.readValue(text, InputJson.class);
+        final var request = OBJECT_MAPPER.readValue(text, InputJson.class);
         for (var event : request.data) {
             var trade = new Trade(event.stock, event.time, event.price);
-//            if (trade.stockName.equals("DFE")) {
-//                LOG.info("DFE trade {}",trade);
-//            }
             marketManager.processMarketEvent(trade);
         }
     }
 
     @Override
     public void onError(WebSocket websocket, WebSocketException cause) throws Exception {
-        super.onError(websocket, cause);
+        LOG.error("error", cause);
     }
 
     @Override
     public void onUnexpectedError(WebSocket websocket, WebSocketException cause) throws Exception {
-        super.onUnexpectedError(websocket, cause);
+        LOG.error("unecpected error", cause);
+    }
+
+    @Override
+    public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+        LOG.info("disconected by" + (closedByServer ? "server" : "error"));
+    }
+
+    @Override
+    public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+        LOG.error("connection error", exception);
     }
 }

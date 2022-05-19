@@ -6,6 +6,7 @@ import spark.Route;
 
 import java.time.temporal.ChronoUnit;
 
+import static candles.Application.OBJECT_MAPPER;
 import static spark.Spark.get;
 import static spark.Spark.path;
 
@@ -39,7 +40,8 @@ public class CandleResource implements Resource {
             final var timeUnitLength = Integer.parseInt(request.queryParams("l"));
 
             final var candleSize = new CandleSize(timeUnitLength, chronoUnit);
-            return marketManager.getCandles(stockName, candleSize);
+            final var candles =  marketManager.getCandles(stockName, candleSize);
+            return OBJECT_MAPPER.writeValueAsString(candles);
         };
     }
 

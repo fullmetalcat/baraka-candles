@@ -1,7 +1,5 @@
 package candles.config;
 
-import candles.Application;
-import candles.model.Stock;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.slf4j.Logger;
@@ -16,8 +14,8 @@ import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.nio.file.Files.readString;
 
-public class ConfigParser {
-    private static final Logger LOG = LoggerFactory.getLogger(ConfigParser.class);
+public class ConfigLoader {
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigLoader.class);
 
     public static Config loadLocalConfigFrom(String configLocation) {
         LOG.info("Loading config from file {}", configLocation);
