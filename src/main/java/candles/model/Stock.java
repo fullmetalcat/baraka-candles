@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -18,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -42,7 +41,7 @@ public class Stock {
 
         candleUnits.forEach(cu -> {
             candles.put(cu, new LinkedList<>());
-            final var durationInMillis = max(cu.getDurationInMillis(), 60_000);//euristic for big candles
+            final var durationInMillis = min(cu.getDurationInMillis(), 60_000);//euristic for big candles
             curTrades.put(cu, new ConcurrentLinkedDeque<>());
             consistencyLocks.put(cu, new ReentrantLock());
             scheduler.scheduleAtFixedRate(() -> {
