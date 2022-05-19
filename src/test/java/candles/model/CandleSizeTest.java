@@ -29,7 +29,7 @@ class CandleSizeTest {
 
     @Test
     void should_not_be_able_to_create_bad_candle() {
-        assertThatThrownBy(() -> new CandleSize(7, SECONDS)).hasMessage("tried to create inappropriate candle with unit Second sand size 7");
+        assertThatThrownBy(() -> new CandleSize(7, SECONDS)).hasMessage("tried to create inappropriate candle with unit Seconds and size 7");
     }
 
     @Test

@@ -7,7 +7,7 @@ How to build:
 ./gradlew build
 
 How to launch locally:
-java -jar candles.jar src/main/resources/candles-config.yml
+java -jar ./build/libs/candles-CURRENT-SNAPSHOT-all.jar ./src/main/resources/candles-config.yml
 
 How to use with docker:
 docker build -t dockerfile .
@@ -22,5 +22,7 @@ stock_name - name of the symbol. can be any stock name that was processed by the
 chrono_unit_name - name of candle chronoUnit(java class) - is configured in CandleSize. 
 
 size - number of chrono unints in the candle
+
+example: http://localhost:8080/DFE/candles?cu=SECONDS&l=5
 
 API will return results only for pre-configured candle sizes(candles-config.yml)
