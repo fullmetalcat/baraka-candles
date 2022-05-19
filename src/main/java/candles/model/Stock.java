@@ -23,7 +23,7 @@ public class Stock {
     private static final Logger LOG = LoggerFactory.getLogger(Stock.class);
 
     public final String stockName;
-    // long-term ready candle storage
+    // long-term ready candle storage - possible to push to external storage
     private final Map<CandleSize, List<Candle>> candles;
     // storage for not-ready candles
     private final Map<CandleSize, CandleBuilder> currentCandles;
