@@ -37,6 +37,18 @@ class CandleSizeTest {
         assertThatThrownBy(() -> CandleSize.getBiggerTimeUnit(DAYS)).hasMessage("unsupported ChronoUnit");
     }
 
+    @Test
+    void should_support_singe_candle_size_unit() {
+        // given
+        var candleSize = new CandleSize(1, SECONDS);
+
+        //when
+        var borderTime = candleSize.calculateAbsoluteStartDate(LocalDateTime.of(2022, 12, 12, 12 , 12, 9, 10));
+
+        //then
+        assertThat(borderTime).isEqualTo(LocalDateTime.of(2022, 12, 12, 12 , 12, 9));
+    }
+
     @ParameterizedTest
     @MethodSource("timesForFiveSeconds")
     void should_return_correct_time_truncations(LocalDateTime tradeTime, LocalDateTime expectedTime) {

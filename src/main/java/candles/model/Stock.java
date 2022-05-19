@@ -55,6 +55,7 @@ public class Stock {
 
     public List<Candle> getCandles(CandleSize candleSize) {
         final var lock = consistencyLocks.get(candleSize);
+
         lock.lock();
 
         try {
@@ -70,9 +71,7 @@ public class Stock {
             } else {
                 return unmodifiableList(finalCandles);
             }
-
         } finally {
-            System.out.println("returned candles");
             lock.unlock();
         }
     }
@@ -168,7 +167,7 @@ public class Stock {
                     }
                 }
             }
-            curTrades.put(candleSize, new ConcurrentLinkedDeque<>(candleTrades));//re-adding trades if no closed candle was calculated
+            curTrades.put(candleSize, new ConcurrentLinkedDeque<>(candleTrades));//re-adding trades from non-final candle
         } finally {
             lock.unlock();
         }

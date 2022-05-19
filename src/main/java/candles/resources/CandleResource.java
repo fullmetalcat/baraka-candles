@@ -2,6 +2,7 @@ package candles.resources;
 
 import candles.model.CandleSize;
 import candles.model.MarketManager;
+import candles.resources.output.JsonCandles;
 import spark.Route;
 
 import java.time.temporal.ChronoUnit;
@@ -23,37 +24,24 @@ public class CandleResource implements Resource {
         path("/:stock", () -> {
             get("/candles", getCandles());
         });
-
-        path("/candles", () -> {
-            get("", getCandlesInfo());
-        });
-
-        path("/stocks", () -> {
-            get("", getAvailableStocks());
-        });
     }
 
     private Route getCandles() {
         return (request, response) -> {
             final var stockName = request.params("stock");
-            final var chronoUnit = ChronoUnit.valueOf(request.queryParams("cu"));
+            final var chronoUnit = ChronoUnit.valueOf(request.queryParams("cu").toUpperCase());
             final var timeUnitLength = Integer.parseInt(request.queryParams("l"));
 
             final var candleSize = new CandleSize(timeUnitLength, chronoUnit);
             final var candles =  marketManager.getCandles(stockName, candleSize);
-            return OBJECT_MAPPER.writeValueAsString(candles);
-        };
-    }
 
-    private Route getCandlesInfo() {
-        return (request, response) -> {
-            return marketManager.getCandleUnits();
-        };
-    }
-
-    private Route getAvailableStocks() {
-        return (request, response) -> {
-            return marketManager.getStockNames();
+            if (candles.isPresent()) {
+                final var jsonCandles = new JsonCandles(candles.get(), candleSize);
+                return OBJECT_MAPPER.writeValueAsString(jsonCandles);
+            } else {
+                response.status(404);
+                return "";
+            }
         };
     }
 

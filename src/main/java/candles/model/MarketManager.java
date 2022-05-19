@@ -2,6 +2,7 @@ package candles.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,11 +19,10 @@ public class MarketManager {
 
     private final ScheduledExecutorService scheduler;
 
-    // TODO from config
-    public MarketManager(List<CandleSize> candleUnits, int threadpoolSize) {
+    public MarketManager(List<CandleSize> candleUnits, int threadPoolSize) {
         this.market = new ConcurrentHashMap<>();
         this.candleUnits = candleUnits;
-        this.scheduler = newScheduledThreadPool(threadpoolSize);
+        this.scheduler = newScheduledThreadPool(threadPoolSize);
     }
 
     public void processMarketEvent(Trade event) {
@@ -30,16 +30,15 @@ public class MarketManager {
         stock.addTrade(event);
     }
 
-    public List<Candle> getCandles(String stockName, CandleSize candleSize) {
+    public Optional<List<Candle>> getCandles(String stockName, CandleSize candleSize) {
+        if (!candleUnits.contains(candleSize)) {
+            return Optional.empty();
+        }
         final var stock = market.get(stockName);
-        return stock.getCandles(candleSize);
+        if (stock != null) {
+            return Optional.of(stock.getCandles(candleSize));
+        }
+        return Optional.empty();
     }
 
-    public List<CandleSize> getCandleUnits() {
-        return unmodifiableList(candleUnits);
-    }
-
-    public Set<String> getStockNames() {
-        return unmodifiableSet(market.keySet());
-    }
 }

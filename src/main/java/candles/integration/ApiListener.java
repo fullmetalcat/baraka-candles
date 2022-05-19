@@ -1,6 +1,5 @@
 package candles.integration;
 
-import candles.input.InputJson;
 import candles.model.MarketManager;
 import candles.model.Trade;
 import com.neovisionaries.ws.client.WebSocket;

@@ -4,10 +4,7 @@ import candles.config.Config;
 import candles.integration.ApiListener;
 import candles.model.MarketManager;
 import candles.resources.CandleResource;
-import candles.resources.serializers.CustomDateTimeSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
@@ -17,9 +14,6 @@ import spark.Spark;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneOffset;
 
 import static candles.config.ConfigLoader.loadLocalConfigFrom;
@@ -36,21 +30,19 @@ public class Application {
     public final static ZoneOffset DEFAULT_TIME_ZONE_OFFSET = UTC;
 
     public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .registerModule(new SimpleModule("customSerializers")
-            .addSerializer(LocalDateTime.class, new CustomDateTimeSerializer(LocalDateTime.class)))
         .configure(WRITE_BIGDECIMAL_AS_PLAIN, true)
         .configure(WRITE_DATES_AS_TIMESTAMPS, true)
         .configure(WRITE_DATES_AS_TIMESTAMPS, true)
         .configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
         .configure(USE_BIG_DECIMAL_FOR_FLOATS, true)
         .configure(WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
-        .configure(READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
+        .configure(READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+        .disable(WRITE_DATES_AS_TIMESTAMPS);
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
         final var configPath = args[args.length - 1];
-
         try {
             final var config = loadLocalConfigFrom(configPath);
             start(config);
