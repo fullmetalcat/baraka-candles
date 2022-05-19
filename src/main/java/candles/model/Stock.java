@@ -92,7 +92,7 @@ public class Stock {
                 var existingCandleSliceTimeLeft = candleSize.calculateAbsoluteStartDate(existingCandle.openTime);
                 var existingCandleSliceTimeRight = candleSize.calculateAbsoluteEndDate(existingCandleSliceTimeLeft);
 
-                // case when first trade we scan closes existing current trade
+                // case when first trade we scan closes existing current candle
                 if (firstTrade.time.isAfter(existingCandleSliceTimeRight)) {
                     final var newCandle = existingCandle.build();
                     candles.get(candleSize).add(newCandle);
