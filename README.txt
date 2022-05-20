@@ -10,9 +10,10 @@ How to launch locally:
 java -jar ./build/libs/candles-CURRENT-SNAPSHOT-all.jar ./src/main/resources/candles-config.yml
 
 How to use with docker:
-docker build -t dockerfile .
-docker run -d -p 9989:9989 -p 8080:8080 dockerfile
 
+docker build -t dockerfile .
+
+docker run -d -p 9989:9989 -p 8080:8080 dockerfile
 
 
 REST API has one method - GET /<stock_name>/candles?cu=<chrono_unit_name>&l=<size>;
